@@ -1,6 +1,7 @@
 // /src/controllers/adminController.js
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const payoutService = require('../services/payoutService'); // <-- 1. IMPORTAR AQUI
 
 exports.publishResult = async (req, res) => {
   // 1. O ID do sorteio virá da URL (ex: /api/admin/results/1)
@@ -45,11 +46,17 @@ exports.publishResult = async (req, res) => {
         prize3_number,
         prize4_number,
         prize5_number,
-        prize6_number: prize6_number || null, // Se for nulo, salva null
-        prize7_number: prize7_number || null, // Se for nulo, salva null
+        prize6_number: prize6_number || null,
+        prize7_number: prize7_number || null,
         status: 'PUBLISHED', // Mudamos o status!
       },
     });
+
+    // --- TAREFA 2.3: O GATILHO ---
+    // (A linha mais importante da Sprint 2)
+    // Chamamos nosso executor para processar este sorteio.
+    payoutService.processarSorteio(updatedDrawResult.id);
+    // ----------------------------
 
     res.json({ message: 'Resultado publicado com sucesso!', result: updatedDrawResult });
 
