@@ -1,121 +1,162 @@
 // /src/utils/validationService.js
 
-// --- Funções Auxiliares de Validação ---
-
-// Verifica se é uma string numérica de um tamanho exato
-// Ex: "123" com len=3 -> true
-// Ex: "12" com len=3 -> false
-// Ex: "abc" com len=3 -> false
-const isNumericString = (str, len) => {
-    const regex = new RegExp(`^\\d{${len}}$`); // Ex: /^\d{3}$/
-    return regex.test(str);
-  };
-  
-  // Verifica se é um número de Grupo válido (1-25)
-  const isGrupoValido = (groupStr) => {
-    if (!/^\d+$/.test(groupStr)) return false; // Não é numérico
-    const groupInt = parseInt(groupStr, 10);
-    return groupInt >= 1 && groupInt <= 25;
-  };
-  
-  // Verifica uma lista de grupos (ex: "10,15,20")
-  const areGruposValidos = (groupsStr, count) => {
-    const groups = groupsStr.split(',').map(g => g.trim());
-    if (groups.length !== count) {
-      return `deve conter ${count} grupos separados por vírgula.`;
-    }
-    if (!groups.every(isGrupoValido)) {
-      return "contém um ou mais grupos inválidos (deve ser 1-25).";
-    }
-    return true;
-  };
-  
-  // --- A Função Principal de Validação ---
-  
-  /**
-   * Valida o campo 'numbers_betted' com base no tipo de aposta.
-   * @param {string} betTypeName - O nome da aposta (ex: "GRUPO", "DUQUE GP")
-   * @param {string} numbersBetted - O que o usuário digitou (ex: "15", "10,15")
-   * @returns {true|string} - Retorna 'true' se for válido, ou uma 'string de erro' se for inválido.
-   */
-  function validateBet(betTypeName, numbersBetted) {
-    if (!numbersBetted || numbersBetted.trim() === '') {
-      return "O campo de números da aposta não pode estar vazio.";
-    }
-  
-    // Usamos um switch para aplicar a regra de cada jogo
-    switch (betTypeName) {
-      case 'GRUPO':
-        if (!isGrupoValido(numbersBetted)) {
-          return "Aposta de Grupo deve ser um único número de 1 a 25 (ex: '15').";
-        }
-        break;
-  
-      case 'DEZENA':
-        if (!isNumericString(numbersBetted, 2)) {
-          return "Aposta de Dezena deve ser um número de 2 dígitos (ex: '05', '60').";
-        }
-        break;
-  
-      case 'CENTENA':
-      case 'CENTENA INV':
-        if (!isNumericString(numbersBetted, 3)) {
-          return `Aposta de ${betTypeName} deve ser um número de 3 dígitos (ex: '123').`;
-        }
-        break;
-  
-      case 'MILHAR':
-      case 'MILHAR INV':
-      case 'MILHAR E CT': // Milhar e Centena usa a Milhar como base
-        if (!isNumericString(numbersBetted, 4)) {
-          return `Aposta de ${betTypeName} deve ser um número de 4 dígitos (ex: '4360').`;
-        }
-        break;
-        
-      case 'UNIDADE':
-        if (!isNumericString(numbersBetted, 1)) {
-          return "Aposta de Unidade deve ser um número de 1 dígito (ex: '7').";
-        }
-        break;
-  
-      // --- Validação de Combinações ---
-  
-      case 'DUQUE GP': {
-        const result = areGruposValidos(numbersBetted, 2);
-        if (result !== true) return `Duque de Grupo ${result}`;
-        break;
-      }
-  
-      case 'TERNO GP': {
-        const result = areGruposValidos(numbersBetted, 3);
-        if (result !== true) return `Terno de Grupo ${result}`;
-        break;
-      }
-        
-      case 'QUADRA GP': {
-        const result = areGruposValidos(numbersBetted, 4);
-        if (result !== true) return `Quadra de Grupo ${result}`;
-        break;
-      }
-        
-      case 'QUINA GP 8/5': {
-        const result = areGruposValidos(numbersBetted, 5); // O seu gameLogic usa k=5
-        if (result !== true) return `Quina de Grupo ${result}`;
-        break;
-      }
-        
-      // (Podemos adicionar DUQUE DEZ, TERNO DEZ, etc. depois, seguindo o mesmo padrão)
-  
-      default:
-        // Se não reconhecermos o tipo, pulamos a validação por segurança
-        // (Isso permite 'PALPITAO', etc. que não definimos)
-        break;
-    }
-  
-    // Se passou por tudo, a aposta é válida!
-    return true;
+const toList = (input) => {
+  if (Array.isArray(input)) {
+    return input.map((item) => String(item).trim()).filter(Boolean);
   }
-  
-  module.exports = {
-    validateBet,
-  };
+  if (input === undefined || input === null) {
+    return [];
+  }
+  return String(input)
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+};
+
+const isNumericString = (str, len) => {
+  const regex = new RegExp(`^\\d{${len}}$`);
+  return regex.test(str);
+};
+
+const isGrupoValido = (groupStr) => {
+  if (!/^\d+$/.test(groupStr)) return false;
+  const groupInt = parseInt(groupStr, 10);
+  return groupInt >= 1 && groupInt <= 25;
+};
+
+const areGruposValidos = (groupsInput, count) => {
+  const groups = toList(groupsInput);
+  if (groups.length !== count) {
+    return `deve conter ${count} grupos separados por vírgula.`;
+  }
+  if (!groups.every(isGrupoValido)) {
+    return 'contém um ou mais grupos inválidos (deve ser 1-25).';
+  }
+  return true;
+};
+
+const ensureSingleGrupo = (values, label) => {
+  const first = values[0];
+  if (values.length !== 1 || !isGrupoValido(first)) {
+    return `${label} deve ser um único número de 1 a 25 (ex: '15').`;
+  }
+  return true;
+};
+
+const ensureSingleNumeric = (values, len, label) => {
+  const first = values[0];
+  if (values.length !== 1 || !isNumericString(first, len)) {
+    return `${label} deve ser um número de ${len} dígitos.`;
+  }
+  return true;
+};
+
+const ensureNumericList = (values, len, count, label) => {
+  if (values.length !== count) {
+    return `${label} deve conter exatamente ${count} valores (${len} dígitos cada).`;
+  }
+  if (!values.every((item) => isNumericString(item, len))) {
+    return `${label} deve conter apenas números de ${len} dígitos.`;
+  }
+  return true;
+};
+
+const ensureGrupoList = (values, count, label) => {
+  const result = areGruposValidos(values, count);
+  if (result !== true) {
+    return `${label} ${result}`;
+  }
+  return true;
+};
+
+function validateBet(betTypeName, numbersBetted) {
+  const type = (betTypeName || '').toUpperCase();
+  const values = toList(numbersBetted);
+
+  if (!values.length) {
+    return 'O campo de números da aposta não pode estar vazio.';
+  }
+
+  // Tipos simples (um único valor)
+  if (
+    (type === 'GRUPO' || type === 'GRUPO ESQ' || type === 'GRUPO MEIO') ||
+    (type.startsWith('GRUPO') && !type.includes('DUQUE') && !type.includes('TERNO') &&
+      !type.includes('QUADRA') && !type.includes('QUINA') && !type.includes('SENA') &&
+      !type.includes('PASSE'))
+  ) {
+    return ensureSingleGrupo(values, 'Aposta de Grupo');
+  }
+
+  if (type.startsWith('DEZENA') && !type.includes('DUQUE') && !type.includes('TERNO')) {
+    return ensureSingleNumeric(values, 2, 'Aposta de Dezena');
+  }
+
+  if (type.startsWith('CENTENA INV')) {
+    return ensureSingleNumeric(values, 3, 'Aposta de Centena Invertida');
+  }
+
+  if (type.startsWith('CENTENA')) {
+    return ensureSingleNumeric(values, 3, 'Aposta de Centena');
+  }
+
+  if (type.startsWith('MILHAR INV')) {
+    return ensureSingleNumeric(values, 4, 'Aposta de Milhar Invertida');
+  }
+
+  if (type.startsWith('MILHAR E CT')) {
+    return ensureSingleNumeric(values, 4, 'Aposta de Milhar e Centena');
+  }
+
+  if (type.startsWith('MILHAR')) {
+    return ensureSingleNumeric(values, 4, 'Aposta de Milhar');
+  }
+
+  if (type.startsWith('UNIDADE')) {
+    return ensureSingleNumeric(values, 1, 'Aposta de Unidade');
+  }
+
+  // Combinações de grupo
+  if (type.startsWith('DUQUE GP')) {
+    return ensureGrupoList(values, 2, 'Duque de Grupo');
+  }
+
+  if (type.startsWith('TERNO GP')) {
+    return ensureGrupoList(values, 3, 'Terno de Grupo');
+  }
+
+  if (type.startsWith('QUADRA GP')) {
+    return ensureGrupoList(values, 4, 'Quadra de Grupo');
+  }
+
+  if (type.startsWith('QUINA GP')) {
+    return ensureGrupoList(values, 5, 'Quina de Grupo');
+  }
+
+  if (type.startsWith('SENA GP')) {
+    return ensureGrupoList(values, 6, 'Sena de Grupo');
+  }
+
+  if (type.startsWith('PASSE VAI')) {
+    return ensureGrupoList(values, 2, 'Passe');
+  }
+
+  // Combinações de dezena
+  if (type.startsWith('DUQUE DEZ')) {
+    return ensureNumericList(values, 2, 2, 'Duque de Dezena');
+  }
+
+  if (type.startsWith('TERNO DEZ SECO')) {
+    return ensureNumericList(values, 2, 3, 'Terno de Dezena Seco');
+  }
+
+  if (type.startsWith('TERNO DEZ')) {
+    return ensureNumericList(values, 2, 3, 'Terno de Dezena');
+  }
+
+  // Outros tipos ainda sem validação específica (ex: PALPITAO)
+  return true;
+}
+
+module.exports = {
+  validateBet,
+};

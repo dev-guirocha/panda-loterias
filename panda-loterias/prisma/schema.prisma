@@ -85,7 +85,7 @@ model DrawResult {
 
 model Bet {
   id              Int       @id @default(autoincrement())
-  numbers_betted  String // Pode ser um JSON string: '["5", "10"]' ou só '"123"'
+  numbers_betted  Json
   amount_wagered  Decimal
   amount_won      Decimal   @default(0.0)
   status          BetStatus @default(PENDING) // Nosso ENUM

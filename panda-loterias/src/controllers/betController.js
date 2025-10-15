@@ -5,6 +5,25 @@ const prisma = new PrismaClient();
 // Importa nosso validador (da Sprint 4)
 const { validateBet } = require('../utils/validationService'); 
 
+const normalizeNumbers = (raw) => {
+  if (Array.isArray(raw)) {
+    return raw.map((value) => String(value).trim()).filter(Boolean);
+  }
+
+  if (typeof raw === 'string') {
+    return raw
+      .split(',')
+      .map((value) => value.trim())
+      .filter((value) => value !== '');
+  }
+
+  if (raw === undefined || raw === null) {
+    return [];
+  }
+
+  return [String(raw).trim()].filter(Boolean);
+};
+
 /**
  * Rota: POST /api/bets
  * Cria UMA aposta única.
@@ -22,11 +41,13 @@ exports.createBet = async (req, res) => {
     amount_wagered,
   } = req.body;
 
+  const normalizedNumbers = normalizeNumbers(numbers_betted);
+
   const wagerAmount = new Decimal(amount_wagered || 0);
 
   // --- 2. VALIDAÇÕES (Fora da Transação) ---
 
-  if (!game_type_id || !bet_type_id || !prize_tier_id || !draw_schedule_id || !numbers_betted || wagerAmount.lte(0)) {
+  if (!game_type_id || !bet_type_id || !prize_tier_id || !draw_schedule_id || !normalizedNumbers.length || wagerAmount.lte(0)) {
     return res.status(400).json({ error: 'Dados da aposta incompletos ou inválidos.' });
   }
 
@@ -53,8 +74,8 @@ exports.createBet = async (req, res) => {
 
     // Validação 3 (Tarefa 4.3): Validação de Entrada (Números)
     const validationResult = validateBet(
-      payoutRule.bet_type.name, // Ex: "DUQUE GP"
-      numbers_betted             // Ex: "10,15"
+      payoutRule.bet_type.name,
+      normalizedNumbers.join(',')
     );
     if (validationResult !== true) {
       return res.status(400).json({ error: validationResult });
@@ -111,7 +132,7 @@ exports.createBet = async (req, res) => {
           bet_type_id: bet_type_id,
           prize_tier_id: prize_tier_id,
           draw_result_id: drawResult.id,
-          numbers_betted: String(numbers_betted),
+          numbers_betted: normalizedNumbers,
           amount_wagered: wagerAmount,
           status: 'PENDING',
         },
@@ -151,10 +172,12 @@ exports.createBetSlip = async (req, res) => {
   let totalCost = new Decimal(0);
   for (const bet of bets) {
     // Validamos se os dados essenciais estão presentes
-    if (!bet.game_type_id || !bet.bet_type_id || !bet.prize_tier_id || !bet.draw_schedule_id || !bet.numbers_betted || !bet.amount_wagered) {
+    const normalizedNumbers = normalizeNumbers(bet.numbers_betted);
+    if (!bet.game_type_id || !bet.bet_type_id || !bet.prize_tier_id || !bet.draw_schedule_id || !normalizedNumbers.length || !bet.amount_wagered) {
       return res.status(400).json({ error: 'Uma ou mais apostas no carrinho estão incompletas.' });
     }
     totalCost = totalCost.add(new Decimal(bet.amount_wagered));
+    bet.normalizedNumbers = normalizedNumbers; // armazenamos para reutilizar depois
   }
   
   if (totalCost.lte(0)) {
@@ -182,6 +205,26 @@ exports.createBetSlip = async (req, res) => {
 
       // 2c. Fazer um loop e criar cada aposta
       for (const bet of bets) {
+        const normalizedNumbers = bet.normalizedNumbers || normalizeNumbers(bet.numbers_betted);
+        // 2c-a. Revalidar combinação e palpites
+        const payoutRule = await tx.payoutRule.findFirst({
+          where: { bet_type_id: bet.bet_type_id, prize_tier_id: bet.prize_tier_id },
+          include: {
+            bet_type: { select: { name: true } },
+          },
+        });
+
+        if (!payoutRule) {
+          throw new Error('Combinação de modalidade e prêmio inválida.');
+        }
+
+        const validationResult = validateBet(
+          payoutRule.bet_type.name,
+          normalizedNumbers.join(',')
+        );
+        if (validationResult !== true) {
+          throw new Error(validationResult);
+        }
         
         // (Re-usamos a lógica de 'roll-over' do createBet)
         const schedule = await tx.drawSchedule.findUnique({ where: { id: bet.draw_schedule_id } });
@@ -224,7 +267,7 @@ exports.createBetSlip = async (req, res) => {
             bet_type_id: bet.bet_type_id,
             prize_tier_id: bet.prize_tier_id,
             draw_result_id: drawResult.id,
-            numbers_betted: String(bet.numbers_betted),
+            numbers_betted: normalizedNumbers,
             amount_wagered: new Decimal(bet.amount_wagered),
             status: 'PENDING',
           },

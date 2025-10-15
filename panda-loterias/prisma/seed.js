@@ -2,26 +2,32 @@
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
+const upsertManyByName = async (model, data) => {
+  for (const entry of data) {
+    await model.upsert({
+      where: { name: entry.name },
+      update: entry,
+      create: entry,
+    });
+  }
+};
+
 async function main() {
   console.log('Iniciando o seeding...');
 
   // --- 1. GameTypes (Tipos de Jogo) ---
-  console.log('Criando Tipos de Jogo...');
-  await prisma.gameType.createMany({
-    data: [
-      { name: 'TRADICIONAL' },
-      { name: 'TRADICIONAL 1/10' },
-      { name: 'LOT. URUGUAIA' },
-      { name: 'QUININHA' },
-      { name: 'SENINHA' },
-      { name: 'SUPER15' },
-    ],
-    // A linha 'skipDuplicates: true' foi removida
-  });
-  console.log('Tipos de Jogo criados.');
+  console.log('Criando/atualizando Tipos de Jogo...');
+  await upsertManyByName(prisma.gameType, [
+    { name: 'TRADICIONAL' },
+    { name: 'TRADICIONAL 1/10' },
+    { name: 'LOT. URUGUAIA' },
+    { name: 'QUININHA' },
+    { name: 'SENINHA' },
+    { name: 'SUPER15' },
+  ]);
 
   // --- 2. DrawSchedules (Horários dos Sorteios) ---
-  console.log('Criando Horários de Sorteio...');
+  console.log('Criando/atualizando Horários de Sorteio...');
   const schedulesData = [
     { name: 'PTM', draw_time: '11:20:00', bet_close_time: '11:15:00' },
     { name: 'PT', draw_time: '14:20:00', bet_close_time: '14:15:00' },
@@ -29,26 +35,56 @@ async function main() {
     { name: 'PTN', draw_time: '18:20:00', bet_close_time: '18:15:00' },
     { name: 'COR', draw_time: '21:20:00', bet_close_time: '21:15:00' },
   ];
-  await prisma.drawSchedule.createMany({
-    data: schedulesData,
-    // A linha 'skipDuplicates: true' foi removida
-  });
-  console.log('Horários de Sorteio criados.');
+  await upsertManyByName(prisma.drawSchedule, schedulesData);
 
 
   // --- 3. BetTypes (Modalidades de Aposta) ---
   console.log('Criando Modalidades de Aposta...');
   const betTypesData = [
-    { name: 'GRUPO' }, { name: 'DEZENA' }, { name: 'CENTENA' }, { name: 'MILHAR' },
-    { name: 'DUQUE GP' }, { name: 'TERNO GP' }, { name: 'DUQUE DEZ' }, { name: 'TERNO DEZ' },
-    { name: 'CENTENA INV' }, { name: 'MILHAR INV' }, { name: 'MILHAR E CT' }, { name: 'UNIDADE' },
-    { name: 'PASSE VAI' }, { name: 'PASSE VAI VEM' }, { name: 'QUADRA GP' }, { name: 'QUINA GP 8/5' },
-    { name: 'SENA GP 10/6' }, { name: 'PALPITAO' }
+    { name: 'GRUPO' },
+    { name: 'GRUPO ESQ' },
+    { name: 'GRUPO MEIO' },
+    { name: 'DEZENA' },
+    { name: 'DEZENA ESQ' },
+    { name: 'DEZENA MEIO' },
+    { name: 'CENTENA' },
+    { name: 'CENTENA 3X' },
+    { name: 'CENTENA ESQUERDA' },
+    { name: 'CENTENA INV' },
+    { name: 'CENTENA INV ESQ' },
+    { name: 'MILHAR' },
+    { name: 'MILHAR INV' },
+    { name: 'MILHAR E CT' },
+    { name: 'UNIDADE' },
+    { name: 'DUQUE GP' },
+    { name: 'DUQUE GP ESQ' },
+    { name: 'DUQUE GP MEIO' },
+    { name: 'TERNO GP' },
+    { name: 'TERNO GP ESQ' },
+    { name: 'TERNO GP MEIO' },
+    { name: 'QUADRA GP' },
+    { name: 'QUADRA GP ESQ' },
+    { name: 'QUADRA GP MEIO' },
+    { name: 'QUINA GP 8/5' },
+    { name: 'QUINA GP 8/5 ESQ' },
+    { name: 'QUINA GP 8/5 MEIO' },
+    { name: 'SENA GP 10/6' },
+    { name: 'SENA GP 10/6 ESQ' },
+    { name: 'SENA GP 10/6 MEIO' },
+    { name: 'DUQUE DEZ' },
+    { name: 'DUQUE DEZ ESQ' },
+    { name: 'DUQUE DEZ MEIO' },
+    { name: 'TERNO DEZ' },
+    { name: 'TERNO DEZ ESQ' },
+    { name: 'TERNO DEZ MEIO' },
+    { name: 'TERNO DEZ SECO' },
+    { name: 'TERNO DEZ SECO ESQ' },
+    { name: 'TERNO DEZ SECO MEIO' },
+    { name: 'PALPITAO' },
+    { name: 'PASSE VAI' },
+    { name: 'PASSE VAI VEM' },
   ];
-  await prisma.betType.createMany({
-    data: betTypesData,
-    // A linha 'skipDuplicates: true' foi removida
-  });
+  await upsertManyByName(prisma.betType, betTypesData);
   
   // Buscar TODOS os BetTypes que acabamos de criar
   const betTypes = await prisma.betType.findMany({
@@ -70,10 +106,7 @@ async function main() {
     { name: '6 PRÊMIO', start_prize: 6, end_prize: 6, description: 'Válido apenas para o 6º prêmio.' },
     { name: '7 PRÊMIO', start_prize: 7, end_prize: 7, description: 'Válido apenas para o 7º prêmio.' },
   ];
-  await prisma.prizeTier.createMany({
-    data: prizeTiersData,
-    // A linha 'skipDuplicates: true' foi removida
-  });
+  await upsertManyByName(prisma.prizeTier, prizeTiersData);
 
   // Buscar TODOS os PrizeTiers
   const prizeTiers = await prisma.prizeTier.findMany({
@@ -103,35 +136,73 @@ async function main() {
     };
   };
 
-  const payoutRulesData = [
-    // --- REGRAS BÁSICAS (Que já tínhamos) ---
-    getRule('GRUPO', '1 PRÊMIO', 18.00),
-    getRule('GRUPO', '1/5 PRÊMIO', 3.60), // 18 / 5
-    getRule('DEZENA', '1 PRÊMIO', 60.00),
-    getRule('DEZENA', '1/5 PRÊMIO', 12.00), // 60 / 5
-    getRule('CENTENA', '1 PRÊMIO', 600.00),
-    getRule('CENTENA', '1/5 PRÊMIO', 120.00), // 600 / 5
-    getRule('MILHAR', '1 PRÊMIO', 4000.00),
-    getRule('MILHAR', '1/5 PRÊMIO', 800.00), // 4000 / 5
-    getRule('UNIDADE', '1 PRÊMIO', 8.00),
+  const payoutRulesData = [];
 
-    // --- NOVAS REGRAS (Combinadas) - Ajuste os valores! ---
-    // (O `payout_rate` aqui é POR COMBINAÇÃO VENCEDORA)
-    getRule('DUQUE GP', '1/5 PRÊMIO', 18.00),  // Duque de Grupo (1/5)
-    getRule('TERNO GP', '1/5 PRÊMIO', 130.00), // Terno de Grupo (1/5)
-    getRule('DUQUE DEZ', '1/5 PRÊMIO', 300.00), // Duque de Dezena (1/5)
-    getRule('TERNO DEZ', '1/5 PRÊMIO', 3000.00), // Terno de Dezena (1/5)
+  const addTierRates = (betTypes, tierRates) => {
+    betTypes.forEach((betType) => {
+      Object.entries(tierRates).forEach(([tierName, rate]) => {
+        payoutRulesData.push(getRule(betType, tierName, rate));
+      });
+    });
+  };
 
-    // --- NOVAS REGRAS (Invertidas) - Ajuste os valores! ---
-    // (Invertida geralmente paga menos que a "seca")
-    getRule('CENTENA INV', '1 PRÊMIO', 100.00), // Ex: 600 / 6 (permutações)
-    getRule('CENTENA INV', '1/5 PRÊMIO', 20.00),  // Ex: 100 / 5
-    getRule('MILHAR INV', '1 PRÊMIO', 350.00), // Ex: 4000 / ~11 (permutações com repetição)
-    getRule('MILHAR INV', '1/5 PRÊMIO', 70.00),  // Ex: 350 / 5
-  ];
+  const mirrored = (base) => [`${base}`, `${base} ESQ`, `${base} MEIO`];
+
+  addTierRates(mirrored('GRUPO'), {
+    '1 PRÊMIO': 18.0,
+    '1/5 PRÊMIO': 3.6,
+  });
+
+  addTierRates(mirrored('DEZENA'), {
+    '1 PRÊMIO': 60.0,
+    '1/5 PRÊMIO': 12.0,
+  });
+
+  addTierRates(['CENTENA', 'CENTENA 3X', 'CENTENA ESQUERDA'], {
+    '1 PRÊMIO': 600.0,
+    '1/5 PRÊMIO': 120.0,
+  });
+
+  addTierRates(['UNIDADE'], { '1 PRÊMIO': 8.0 });
+
+  addTierRates(['MILHAR'], {
+    '1 PRÊMIO': 4200.0,
+    '1/5 PRÊMIO': 840.0,
+  });
+
+  addTierRates(['CENTENA INV', 'CENTENA INV ESQ'], {
+    '1 PRÊMIO': 110.0,
+    '1/5 PRÊMIO': 22.0,
+  });
+
+  addTierRates(['MILHAR INV'], {
+    '1 PRÊMIO': 360.0,
+    '1/5 PRÊMIO': 72.0,
+  });
+
+  addTierRates(['MILHAR E CT'], {
+    '1 PRÊMIO': 4200.0,
+    '1/5 PRÊMIO': 840.0,
+  });
+
+  addTierRates(mirrored('DUQUE GP'), { '1/5 PRÊMIO': 20.0 });
+  addTierRates(mirrored('TERNO GP'), { '1/5 PRÊMIO': 140.0 });
+  addTierRates(mirrored('QUADRA GP'), { '1/5 PRÊMIO': 450.0 });
+  addTierRates(mirrored('QUINA GP 8/5'), { '1/5 PRÊMIO': 900.0 });
+  addTierRates(mirrored('SENA GP 10/6'), { '1/5 PRÊMIO': 1350.0 });
+
+  addTierRates(['PASSE VAI', 'PASSE VAI VEM'], { '1/5 PRÊMIO': 24.0 });
+
+  addTierRates(mirrored('DUQUE DEZ'), { '1/5 PRÊMIO': 320.0 });
+  addTierRates(mirrored('TERNO DEZ'), { '1/5 PRÊMIO': 3200.0 });
+  addTierRates(mirrored('TERNO DEZ SECO'), { '1/5 PRÊMIO': 6500.0 });
+
+  addTierRates(['PALPITAO'], { '1 PRÊMIO': 1800.0 });
 
   // Filtramos regras nulas (caso algo dê errado no getRule)
   const validRules = payoutRulesData.filter(Boolean);
+
+  await prisma.payoutRule.deleteMany({});
 
   await prisma.payoutRule.createMany({
     data: validRules,
