@@ -133,7 +133,7 @@ const Carrinho = () => {
                   <Badge colorScheme="green">{formatCurrency(bet.amount_wagered)}</Badge>
                 </HStack>
                 <Text fontSize="sm" color="gray.700">
-                  Palpites: {bet.numbers_display || (Array.isArray(bet.numbers_betted) ? bet.numbers_betted.join(', ') : bet.numbers_betted)}
+                  Palpites: {Array.isArray(bet.numbers_betted) ? bet.numbers_betted.join(', ') : bet.numbers_betted}
                 </Text>
 
                 <Button

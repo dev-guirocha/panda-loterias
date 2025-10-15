@@ -19,7 +19,7 @@ import SelectSchedulePage from './pages/wizard/SelectSchedulePage.jsx'; // Nova 
 import SelectBetTypePage from './pages/wizard/SelectBetTypePage.jsx';
 import SelectPrizeTierPage from './pages/wizard/SelectPrizeTierPage.jsx';
 import EnterBetPage from './pages/wizard/EnterBetPage.jsx';
-import Cart from './pages/Carrinho.jsx';
+import Carrinho from './pages/Carrinho.jsx';
 // ... (outros imports do wizard conforme necessário)
 
 function App() {
@@ -32,7 +32,7 @@ function App() {
         <Route path="/resultados" element={<ResultsPage />} /> 
         <Route
           path="/carrinho"
-          element={<ProtectedRoute><Cart /></ProtectedRoute>}
+          element={<ProtectedRoute><Carrinho /></ProtectedRoute>}
         />
 
         {/* Rotas Privadas */}
