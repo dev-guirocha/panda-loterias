@@ -1,4 +1,14 @@
-'node_modules'
-'.env'
+# macOS cruft
+.DS_Store
 
-/generated/prisma
+# Root env files
+.env
+
+# Backend ignores
+panda-loterias/node_modules/
+panda-loterias/.env
+panda-loterias/generated/prisma
+
+# Frontend ignores
+panda-loterias-web/node_modules/
+panda-loterias-web/dist/
