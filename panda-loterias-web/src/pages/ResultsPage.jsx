@@ -28,7 +28,7 @@ const gameLogic = {
     if (!num || num.length < 2) return '?';
     const dezenaStr = num.slice(-2);
     if (dezenaStr === '00') return '25';
-    const grupo = Math.ceil(parseInt(parseInt(dezenaStr, 10) / 4));
+    const grupo = Math.ceil(parseInt(dezenaStr, 10) / 4);
     return String(grupo);
   }
 };

@@ -113,7 +113,11 @@ const BetHistoryPage = () => {
                   <Td>{new Date(bet.draw_date).toLocaleDateString('pt-BR')}</Td>
                   <Td>{bet.draw_schedule}</Td>
                   <Td>{bet.bet_type} ({bet.prize_tier})</Td>
-                  <Td>{bet.numbers_betted}</Td>
+                  <Td>
+                    {Array.isArray(bet.numbers_betted)
+                      ? bet.numbers_betted.join(', ')
+                      : bet.numbers_betted}
+                  </Td>
                   <Td isNumeric>P$ {Number(bet.amount_wagered).toFixed(2)}</Td>
                   <Td isNumeric>P$ {Number(bet.amount_won).toFixed(2)}</Td>
                   <Td>{getStatusTag(bet.status)}</Td>

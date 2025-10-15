@@ -59,9 +59,15 @@ const EnterBetPage = () => {
     }
 
     // 2. Monta o objeto final da aposta
+    const numbersArray = numbersBetted
+      .split(',')
+      .map((value) => value.trim())
+      .filter((value) => value !== '');
+
     const finalBet = {
       ...betInProgress, // Pega (game_id, schedule_id, bet_type_id, prize_tier_id)
-      numbers_betted: numbersBetted,
+      numbers_betted: numbersArray,
+      numbers_display: numbersBetted.trim(),
       amount_wagered: parseFloat(amountWagered),
       // (Também podemos adicionar o 'text' para o carrinho)
       game_text: betInProgress.game_type_id_text,

@@ -24,6 +24,43 @@ const normalizeNumbers = (raw) => {
   return [String(raw).trim()].filter(Boolean);
 };
 
+async function findOrCreateDrawResult(tx, scheduleId) {
+  const schedule = await tx.drawSchedule.findUnique({ where: { id: scheduleId } });
+  if (!schedule) {
+    throw new Error(`Horário de sorteio (ID: ${scheduleId}) não encontrado.`);
+  }
+
+  const [closeHour, closeMinute] = schedule.bet_close_time.split(':').map(Number);
+  const now = new Date();
+  const closeTimeForToday = new Date();
+  closeTimeForToday.setHours(closeHour, closeMinute, 0, 0);
+
+  let betDate = new Date();
+  if (now.getTime() > closeTimeForToday.getTime()) {
+    betDate.setDate(betDate.getDate() + 1);
+  }
+  betDate.setHours(0, 0, 0, 0);
+
+  let drawResult = await tx.drawResult.findFirst({
+    where: {
+      draw_schedule_id: scheduleId,
+      draw_date: betDate,
+    },
+  });
+
+  if (!drawResult) {
+    drawResult = await tx.drawResult.create({
+      data: {
+        draw_schedule_id: scheduleId,
+        draw_date: betDate,
+        status: 'PENDING',
+      },
+    });
+  }
+
+  return drawResult;
+}
+
 /**
  * Rota: POST /api/bets
  * Cria UMA aposta única.
@@ -81,41 +118,9 @@ exports.createBet = async (req, res) => {
       return res.status(400).json({ error: validationResult });
     }
 
-    // Validação 4 (Tarefa 4.2): Lógica de Data "Roll-Over"
-    const schedule = await prisma.drawSchedule.findUnique({ where: { id: draw_schedule_id } });
-    if (!schedule) {
-      return res.status(404).json({ error: 'Horário de sorteio não encontrado.' });
-    }
-
-    const [closeHour, closeMinute] = schedule.bet_close_time.split(':').map(Number);
-    const now = new Date();
-    const closeTimeForToday = new Date();
-    closeTimeForToday.setHours(closeHour, closeMinute, 0, 0);
-
-    let betDate = new Date();
-    if (now.getTime() > closeTimeForToday.getTime()) {
-      betDate.setDate(betDate.getDate() + 1); // Aposta para amanhã
-    }
-    betDate.setHours(0, 0, 0, 0);
-
     // --- 3. A TRANSAÇÃO ---
     const newBet = await prisma.$transaction(async (tx) => {
-      // 3a. Encontrar ou Criar o Sorteio do Dia (DrawResult)
-      let drawResult = await tx.drawResult.findFirst({
-        where: {
-          draw_schedule_id: draw_schedule_id,
-          draw_date: betDate,
-        },
-      });
-      if (!drawResult) {
-        drawResult = await tx.drawResult.create({
-          data: {
-            draw_schedule_id: draw_schedule_id,
-            draw_date: betDate,
-            status: 'PENDING',
-          },
-        });
-      }
+      const drawResult = await findOrCreateDrawResult(tx, draw_schedule_id);
       // 3b. Debitar o saldo do usuário
       const updatedUser = await tx.user.update({
         where: { id: userId },
@@ -227,37 +232,7 @@ exports.createBetSlip = async (req, res) => {
         }
         
         // (Re-usamos a lógica de 'roll-over' do createBet)
-        const schedule = await tx.drawSchedule.findUnique({ where: { id: bet.draw_schedule_id } });
-        
-        // (Validação extra - o horário existe?)
-        if (!schedule) {
-            throw new Error(`Horário de sorteio (ID: ${bet.draw_schedule_id}) não encontrado.`);
-        }
-        
-        const [closeHour, closeMinute] = schedule.bet_close_time.split(':').map(Number);
-        const now = new Date();
-        const closeTimeForToday = new Date();
-        closeTimeForToday.setHours(closeHour, closeMinute, 0, 0);
-
-        let betDate = new Date();
-        if (now.getTime() > closeTimeForToday.getTime()) {
-          betDate.setDate(betDate.getDate() + 1);
-        }
-        betDate.setHours(0, 0, 0, 0);
-
-        // Encontrar ou criar o Sorteio
-        let drawResult = await tx.drawResult.findFirst({
-          where: { draw_schedule_id: bet.draw_schedule_id, draw_date: betDate },
-        });
-        if (!drawResult) {
-          drawResult = await tx.drawResult.create({
-            data: { 
-              draw_schedule_id: bet.draw_schedule_id, 
-              draw_date: betDate, 
-              status: 'PENDING' 
-            },
-          });
-        }
+        const drawResult = await findOrCreateDrawResult(tx, bet.draw_schedule_id);
 
         // Criar a aposta
         const createdBet = await tx.bet.create({

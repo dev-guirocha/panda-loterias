@@ -88,12 +88,17 @@ const BetForm = () => {
     setIsSubmitting(true); // Ativa o loading
 
     try {
+      const numbersList = numbersBetted
+        .split(',')
+        .map((value) => value.trim())
+        .filter((value) => value !== '');
+
       const betPayload = {
-        game_type_id: 1, 
+        game_type_id: 1,
         draw_schedule_id: parseInt(selectedSchedule),
         bet_type_id: parseInt(selectedBetType),
         prize_tier_id: parseInt(selectedPrizeTier),
-        numbers_betted: numbersBetted,
+        numbers_betted: numbersList,
         amount_wagered: parseFloat(amountWagered),
       };
 
