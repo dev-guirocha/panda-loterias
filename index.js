@@ -10,10 +10,14 @@ app.use(express.json());
 const authRoutes = require('./src/routes/authRoutes');
 const betRoutes = require('./src/routes/betRoutes'); 
 const adminRoutes = require('./src/routes/adminRoutes');
+const userRoutes = require('./src/routes/userRoutes');
+const drawRoutes = require('./src/routes/drawRoutes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/bets', betRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/draws', drawRoutes);
 
 // Rota de teste
 app.get('/', (req, res) => {
