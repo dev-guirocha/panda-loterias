@@ -1,8 +1,9 @@
 // /src/components/Layout.jsx
 import React from 'react';
-import { Box, Flex, Container, Image, Heading, Button, Text, Spacer } from '@chakra-ui/react';
+import { Box, Flex, Container, Image, Heading, Text, Spacer } from '@chakra-ui/react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import Button from './ui/Button';
 
 const Layout = ({ children }) => {
   const { isAuthenticated, user, logout } = useAuth();
@@ -49,12 +50,7 @@ const Layout = ({ children }) => {
                   <RouterLink to="/resultados">
                     <Button variant="ghost" mr="4">Resultados</Button>
                   </RouterLink>
-                  <Button 
-                    colorScheme="red" // Usa o tema "red" (que podemos customizar)
-                    onClick={handleLogout}
-                    bg="panda.red" // Nossa cor da logo!
-                    color="white"
-                  >
+                  <Button variant="danger" onClick={handleLogout}>
                     Sair
                   </Button>
                 </>
@@ -68,9 +64,7 @@ const Layout = ({ children }) => {
                     <Button variant="ghost" mr="4">Login</Button>
                   </RouterLink>
                   <RouterLink to="/register">
-                    <Button colorScheme="green" bg="panda.green" color="white">
-                      Cadastre-se
-                    </Button>
+                    <Button>Cadastre-se</Button>
                   </RouterLink>
                 </>
               )}
@@ -80,8 +74,10 @@ const Layout = ({ children }) => {
       </Box>
 
       {/* --- 2. O CONTEÚDO PRINCIPAL DA PÁGINA --- */}
-      <Box as="main" py="8">
-        {children}
+      <Box as="main" py={{ base: 6, md: 8 }}>
+        <Container maxW="container.lg" px={{ base: 4, md: 6 }}>
+          {children}
+        </Container>
       </Box>
     </Box>
   );

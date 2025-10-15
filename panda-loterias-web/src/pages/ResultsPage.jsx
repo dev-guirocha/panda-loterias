@@ -12,7 +12,6 @@ import {
   VStack,
   HStack,
   Link,
-  Button,
   Icon,
   List,     // Componente de Lista
   ListItem,
@@ -20,6 +19,7 @@ import {
   Tag,
 } from '@chakra-ui/react';
 import { FaArrowLeft, FaTrophy } from 'react-icons/fa'; // Ícone de Troféu
+import Button from '../components/ui/Button';
 
 // (A Mini gameLogic que criamos antes)
 const gameLogic = {
@@ -75,7 +75,15 @@ const ResultsPage = () => {
   return (
     <Box>
       <Link as={RouterLink} to="/">
-        <Button leftIcon={<Icon as={FaArrowLeft} />} colorScheme="gray" variant="outline" mb="6">
+        <Button
+          leftIcon={<Icon as={FaArrowLeft} />}
+          variant="outline"
+          borderColor="gray.200"
+          color="panda.dark"
+          bg="white"
+          _hover={{ bg: 'gray.50' }}
+          mb="6"
+        >
           Voltar ao Dashboard
         </Button>
       </Link>

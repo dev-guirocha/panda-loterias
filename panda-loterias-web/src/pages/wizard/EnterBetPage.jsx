@@ -6,21 +6,20 @@ import {
   Box,
   VStack,
   Text,
-  Input,
   FormControl,
   FormLabel,
-  FormHelperText, // Texto de ajuda para o input
   NumberInput,
   NumberInputField,
   NumberInputStepper,
   NumberIncrementStepper,
   NumberDecrementStepper,
   HStack, // Para os botões de valor
-  Button,
   Divider,
 } from '@chakra-ui/react';
 import { useNewBet } from '../../hooks/useNewBet'; // O "cérebro" da aposta em progresso
 import { useBetSlip } from '../../hooks/useBetSlip'; // O "cérebro" do CARRINHO
+import InputField from '../../components/ui/InputField';
+import Button from '../../components/ui/Button';
 
 // Helper para dar dicas de validação
 const getValidationHint = (betTypeName) => {
@@ -86,17 +85,18 @@ const EnterBetPage = () => {
       <VStack spacing="6" p="4" align="stretch">
         
         {/* --- 1. SEÇÃO DOS PALPITES (Imagem 6) --- */}
-        <FormControl isRequired>
-          <FormLabel fontSize="lg" fontWeight="bold">Digite seu palpite:</FormLabel>
-          <Input
-            placeholder={hint}
-            value={numbersBetted}
-            onChange={(e) => setNumbersBetted(e.target.value)}
-            size="lg"
-            autoFocus // Foca neste campo ao carregar
-          />
-          <FormHelperText>{hint}</FormHelperText>
-        </FormControl>
+        <InputField
+          label="Digite seu palpite:"
+          labelProps={{ fontSize: 'lg', fontWeight: 'bold' }}
+          helperText={hint}
+          inputProps={{
+            placeholder: hint,
+            value: numbersBetted,
+            onChange: (e) => setNumbersBetted(e.target.value),
+            size: 'lg',
+            autoFocus: true,
+          }}
+        />
 
         <Divider />
 
@@ -121,10 +121,10 @@ const EnterBetPage = () => {
 
         {/* Botões de Valor Rápido */}
         <HStack spacing="4">
-          <Button onClick={() => quickAddValue(5)} variant="outline" flex="1">+5</Button>
-          <Button onClick={() => quickAddValue(20)} variant="outline" flex="1">+20</Button>
-          <Button onClick={() => quickAddValue(50)} variant="outline" flex="1">+50</Button>
-          <Button onClick={() => quickAddValue(100)} variant="outline" flex="1">+100</Button>
+          <Button onClick={() => quickAddValue(5)} variant="outline" flex="1" py="4">+5</Button>
+          <Button onClick={() => quickAddValue(20)} variant="outline" flex="1" py="4">+20</Button>
+          <Button onClick={() => quickAddValue(50)} variant="outline" flex="1" py="4">+50</Button>
+          <Button onClick={() => quickAddValue(100)} variant="outline" flex="1" py="4">+100</Button>
         </HStack>
 
         <Divider />
@@ -132,14 +132,7 @@ const EnterBetPage = () => {
         {/* --- 3. AÇÃO FINAL --- */}
         {error && <Text color="panda.red">{error}</Text>}
         
-        <Button
-          colorScheme="green"
-          bg="panda.green"
-          color="white"
-          size="lg"
-          py="8"
-          onClick={handleAddToSlip}
-        >
+        <Button py="8" onClick={handleAddToSlip}>
           Adicionar Aposta ao Carrinho
         </Button>
         

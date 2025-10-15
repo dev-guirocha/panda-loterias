@@ -18,10 +18,10 @@ import {
   VStack,
   Link,
   Tag,   // Para estilizar o status (WON/LOST)
-  Button,
   Icon,
 } from '@chakra-ui/react';
 import { FaArrowLeft } from 'react-icons/fa'; // Ícone de "Voltar"
+import Button from '../components/ui/Button';
 
 const BetHistoryPage = () => {
   const [bets, setBets] = useState([]);
@@ -76,7 +76,15 @@ const BetHistoryPage = () => {
   return (
     <Box>
       <Link as={RouterLink} to="/">
-        <Button leftIcon={<Icon as={FaArrowLeft} />} colorScheme="gray" variant="outline" mb="6">
+        <Button
+          leftIcon={<Icon as={FaArrowLeft} />}
+          variant="outline"
+          borderColor="gray.200"
+          color="panda.dark"
+          bg="white"
+          _hover={{ bg: 'gray.50' }}
+          mb="6"
+        >
           Voltar ao Dashboard
         </Button>
       </Link>

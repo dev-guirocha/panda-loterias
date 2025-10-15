@@ -1,10 +1,9 @@
 // /src/components/WizardLayout.jsx
 import React from 'react';
-import { Box, Flex, Heading, Icon, Container } from '@chakra-ui/react';
-import { FaArrowLeft } from 'react-icons/fa';
+import { Box, Flex, Heading, Icon } from '@chakra-ui/react';
+import { FaArrowLeft, FaShoppingCart } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { useBetSlip } from '../hooks/useBetSlip'; // Para o ícone do carrinho
-import { FaShoppingCart } from 'react-icons/fa';
 
 // Este layout será o "frame" para todas as telas de aposta
 const WizardLayout = ({ title, children }) => {

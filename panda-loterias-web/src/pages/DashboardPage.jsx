@@ -11,10 +11,10 @@ import {
   Link,
   Spinner,
   Icon,
-  Button,
   SimpleGrid, // Vamos usar um Grid para os botões
 } from '@chakra-ui/react';
 import { FaHistory, FaListOl, FaPlus } from 'react-icons/fa'; // Adicionado FaPlus
+import Button from '../components/ui/Button';
 
 const DashboardPage = () => {
   const { user } = useAuth();
@@ -49,15 +49,7 @@ const DashboardPage = () => {
       <Box mb="8">
         <Heading as="h3" size="lg" mb="4">Nova Aposta</Heading>
         <Link as={RouterLink} to="/apostar/jogo" _hover={{ textDecoration: 'none' }}>
-          <Button 
-            leftIcon={<Icon as={FaPlus} />} 
-            colorScheme="green"
-            bg="panda.green"
-            color="white"
-            size="lg"
-            w="100%"
-            py="8" // Botão alto
-          >
+          <Button leftIcon={<Icon as={FaPlus} />} w="100%" py="8">
             Clique aqui para fazer uma nova aposta
           </Button>
         </Link>

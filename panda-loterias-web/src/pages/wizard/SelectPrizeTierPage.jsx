@@ -2,10 +2,11 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import WizardLayout from '../../components/WizardLayout';
-import { Box, VStack, Text, Spinner, Flex, Icon, Divider, Input, InputGroup, InputLeftElement } from '@chakra-ui/react';
+import { Box, VStack, Text, Spinner, Flex, Icon, Divider } from '@chakra-ui/react';
 import { FaAward, FaSearch } from 'react-icons/fa'; // Ícone de Prêmio
 import { useNewBet } from '../../hooks/useNewBet';
 import { useGameRules } from '../../hooks/useGameRules';
+import InputField from '../../components/ui/InputField';
 
 // (Componente ListItem)
 const ListItem = ({ text, description, onClick }) => (
@@ -71,16 +72,22 @@ const SelectPrizeTierPage = () => {
       
       {/* Barra de Busca (como na Imagem 1) */}
       <Box p="4" bg="white">
-        <InputGroup>
-          <InputLeftElement pointerEvents="none">
-            <Icon as={FaSearch} color="gray.400" />
-          </InputLeftElement>
-          <Input 
-            placeholder="Buscar colocação..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </InputGroup>
+        <InputField
+          isRequired={false}
+          helperText=""
+          inputGroupProps={{
+            bg: 'gray.50',
+            borderRadius: 'var(--radius-base)',
+          }}
+          leftElement={<Icon as={FaSearch} color="gray.400" />}
+          inputProps={{
+            placeholder: 'Buscar colocação...',
+            value: searchTerm,
+            onChange: (e) => setSearchTerm(e.target.value),
+            bg: 'transparent',
+            border: 'none',
+          }}
+        />
       </Box>
 
       <VStack spacing="0" align="stretch" bg="white">

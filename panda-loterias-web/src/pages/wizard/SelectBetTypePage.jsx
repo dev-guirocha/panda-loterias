@@ -2,11 +2,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import WizardLayout from '../../components/WizardLayout';
-import { Box, VStack, Text, Spinner, Flex, Icon, Divider, Input, InputGroup, InputLeftElement } from '@chakra-ui/react';
+import { Box, VStack, Text, Spinner, Flex, Icon, Divider } from '@chakra-ui/react';
 import { FaTag, FaSearch } from 'react-icons/fa'; // Ícone de Etiqueta
 import { useNewBet } from '../../hooks/useNewBet';
 import { useGameRules } from '../../hooks/useGameRules';
 import { useMemo, useState } from 'react'; // Para a barra de busca
+import InputField from '../../components/ui/InputField';
 
 // (Componente ListItem)
 const ListItem = ({ text, onClick }) => (
@@ -50,16 +51,22 @@ const SelectBetTypePage = () => {
       
       {/* Barra de Busca (como na Imagem 2) */}
       <Box p="4" bg="white">
-        <InputGroup>
-          <InputLeftElement pointerEvents="none">
-            <Icon as={FaSearch} color="gray.400" />
-          </InputLeftElement>
-          <Input 
-            placeholder="Buscar modalidade..." 
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </InputGroup>
+        <InputField
+          isRequired={false}
+          helperText=""
+          inputGroupProps={{
+            bg: 'gray.50',
+            borderRadius: 'var(--radius-base)',
+          }}
+          leftElement={<Icon as={FaSearch} color="gray.400" />}
+          inputProps={{
+            placeholder: 'Buscar modalidade...',
+            value: searchTerm,
+            onChange: (e) => setSearchTerm(e.target.value),
+            bg: 'transparent',
+            border: 'none',
+          }}
+        />
       </Box>
 
       <VStack spacing="0" align="stretch" bg="white">

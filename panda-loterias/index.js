@@ -34,6 +34,28 @@ app.get('/', (req, res) => {
   res.send('🐼 Servidor da Panda Loterias está no ar!');
 });
 
+// Middleware global de tratamento de erros
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+
+  if (res.headersSent) {
+    return next(err);
+  }
+
+  const statusCode = err.statusCode || err.status || 500;
+  const message = statusCode === 500
+    ? 'Erro interno do servidor.'
+    : err.message || 'Erro inesperado.';
+
+  const payload = { statusCode, message };
+
+  if (err.details) {
+    payload.details = Array.isArray(err.details) ? err.details : [err.details];
+  }
+
+  return res.status(statusCode).json(payload);
+});
+
 // Iniciar o servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

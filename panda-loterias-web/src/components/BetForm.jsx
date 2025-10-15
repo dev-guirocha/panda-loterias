@@ -4,10 +4,8 @@ import api from '../api/api';
 import { useAuth } from '../hooks/useAuth';
 import {
   Box,
-  Button,
   FormControl,
   FormLabel,
-  Input,
   Select, // Substitui o <select>
   SimpleGrid, // Cria um grid responsivo
   VStack,
@@ -22,6 +20,8 @@ import {
   Text,
   HStack,
 } from '@chakra-ui/react';
+import Button from './ui/Button';
+import InputField from './ui/InputField';
 
 const BetForm = () => {
   // --- (Estados para as regras, não mudou) ---
@@ -183,14 +183,15 @@ const BetForm = () => {
         </SimpleGrid>
 
         <SimpleGrid columns={{ base: 1, md: 2 }} spacing="6" width="100%">
-          <FormControl isRequired>
-            <FormLabel>Números (ex: "15" ou "10,15"):</FormLabel>
-            <Input
-              value={numbersBetted}
-              onChange={(e) => setNumbersBetted(e.target.value)}
-              placeholder="Ex: 15"
-            />
-          </FormControl>
+          <InputField
+            label='Números (ex: "15" ou "10,15"):'
+            helperText='Separe múltiplos palpites com vírgula.'
+            inputProps={{
+              value: numbersBetted,
+              onChange: (e) => setNumbersBetted(e.target.value),
+              placeholder: 'Ex: 15',
+            }}
+          />
           
           <FormControl isRequired>
             <FormLabel>Valor (P$):</FormLabel>
@@ -224,15 +225,7 @@ const BetForm = () => {
           </Alert>
         )}
         
-        <Button
-          type="submit"
-          colorScheme="green"
-          bg="panda.green"
-          color="white"
-          size="lg"
-          width="full"
-          isLoading={isSubmitting}
-        >
+        <Button type="submit" width="full" isLoading={isSubmitting}>
           Apostar!
         </Button>
       </VStack>
