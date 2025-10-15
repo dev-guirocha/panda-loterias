@@ -19,6 +19,7 @@ import SelectSchedulePage from './pages/wizard/SelectSchedulePage.jsx'; // Nova 
 import SelectBetTypePage from './pages/wizard/SelectBetTypePage.jsx';
 import SelectPrizeTierPage from './pages/wizard/SelectPrizeTierPage.jsx';
 import EnterBetPage from './pages/wizard/EnterBetPage.jsx';
+import Cart from './pages/Carrinho.jsx';
 // ... (outros imports do wizard conforme necessário)
 
 function App() {
@@ -29,65 +30,41 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/resultados" element={<ResultsPage />} /> 
-        
-        {/* Rotas Privadas */}
-        <Route 
-          path="/" 
-          element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} 
+        <Route
+          path="/carrinho"
+          element={<ProtectedRoute><Cart /></ProtectedRoute>}
         />
-        <Route 
-          path="/historico" 
+
+        {/* Rotas Privadas */}
+        <Route
+          path="/"
+          element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
+        />
+        <Route
+          path="/historico"
           element={<ProtectedRoute><BetHistoryPage /></ProtectedRoute>}
         />
-        
-        {/* --- 2. NOVAS ROTAS DO WIZARD --- */}
-        <Route 
+
+        {/* Wizard */}
+        <Route
           path="/apostar/jogo"
           element={<ProtectedRoute><SelectGamePage /></ProtectedRoute>}
         />
-        <Route 
-          path="/apostar/jogo"
-          element={<ProtectedRoute><SelectGamePage /></ProtectedRoute>}
-        />
-        <Route 
-          path="/apostar/sorteio" // <-- 2. ADICIONAR ROTA
-          element={<ProtectedRoute><SelectSchedulePage /></ProtectedRoute>}
-        />
-        <Route 
-          path="/apostar/jogo"
-          element={<ProtectedRoute><SelectGamePage /></ProtectedRoute>}
-        />
-        <Route 
+        <Route
           path="/apostar/sorteio"
           element={<ProtectedRoute><SelectSchedulePage /></ProtectedRoute>}
         />
-        <Route 
-          path="/apostar/modalidade" // <-- 2. ADICIONAR ROTA
-          element={<ProtectedRoute><SelectBetTypePage /></ProtectedRoute>}
-        />
-        <Route 
-          path="/apostar/jogo"
-          element={<ProtectedRoute><SelectGamePage /></ProtectedRoute>}
-        />
-        <Route 
-          path="/apostar/sorteio"
-          element={<ProtectedRoute><SelectSchedulePage /></ProtectedRoute>}
-        />
-        <Route 
+        <Route
           path="/apostar/modalidade"
           element={<ProtectedRoute><SelectBetTypePage /></ProtectedRoute>}
         />
-        <Route 
-          path="/apostar/colocacao" // <-- 2. ADICIONAR ROTA
+        <Route
+          path="/apostar/colocacao"
           element={<ProtectedRoute><SelectPrizeTierPage /></ProtectedRoute>}
         />
-        <Route path="/apostar/jogo" element={<ProtectedRoute><SelectGamePage /></ProtectedRoute>} />
-        <Route path="/apostar/sorteio" element={<ProtectedRoute><SelectSchedulePage /></ProtectedRoute>} />
-        <Route path="/apostar/modalidade" element={<ProtectedRoute><SelectBetTypePage /></ProtectedRoute>} />
-        <Route path="/apostar/colocacao" element={<ProtectedRoute><SelectPrizeTierPage /></ProtectedRoute>} />
-        <Route 
-          path="/apostar/palpites" // <-- 2. ADICIONAR ROTA
-          element={<ProtectedRoute><EnterBetPage /></ProtectedRoute>} 
+        <Route
+          path="/apostar/palpites"
+          element={<ProtectedRoute><EnterBetPage /></ProtectedRoute>}
         />
       </Routes>
     </Layout>
